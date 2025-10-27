@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Quiz App with Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; }
+    h2 { color: #333; }
+    
+    /* Login styles */
+    #login-container {
+      background: #f9f9f9;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    #login-container input[type="text"],
+    #login-container input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 8px 0 20px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    #login-container button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    #login-container button:hover {
+      background-color: #0056b3;
+    }
+    .error-msg {
+      color: red;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    /* Quiz styles */
+    #quiz-container { margin-top: 30px; }
+    .question { margin-bottom: 20px; }
+    .options button {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+    }
+    .score {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Section -->
+  <div id="login-container">
+    <h2>Login to Quiz App</h2>
+    <div id="error" class="error-msg">Invalid username or password.</div>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <!-- Quiz Section (hidden initially) -->
+  <div id="quiz-container" style="display:none;">
+    <h2>Interactive Quiz App</h2>
+    <div id="question" class="question"></div>
+    <div id="options" class="options"></div>
+    <button id="next-btn" style="display:none;">Next Question</button>
+    <div id="result" class="score"></div>
+  </div>
+
+  <script>
+    // Login functionality
+    const loginForm = document.getElementById('loginForm');
+    const errorDiv = document.getElementById('error');
+    const loginContainer = document.getElementById('login-container');
+    const quizContainer = document.getElementById('quiz-container');
+
+    loginForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        errorDiv.textContent = "Please enter both username and password.";
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      // For demo purposes: accept 'testuser' / 'password123'
+      if (username === 'testuser' && password === 'password123') {
+        // Hide login, show quiz
+        loginContainer.style.display = 'none';
+        quizContainer.style.display = 'block';
+        loadQuestion(); // Start quiz after login
+      } else {
+        errorDiv.textContent = "Invalid username or password.";
+        errorDiv.style.display = 'block';
+      }
+    });
+
+    // Quiz Data
+    const quizData = [
+      {
+        question: "What is the capital of France?",
+        options: ["Berlin", "Madrid", "Paris", "Lisbon"],
+        answer: "Paris"
+      },
+      {
+        question: "Which language runs in a web browser?",
+        options: ["Java", "C", "Python", "JavaScript"],
+        answer: "JavaScript"
+      },
+      {
+        question: "What does CSS stand for?",
+        options: ["Central Style Sheets", "Cascading Style Sheets", "Cascading Simple Sheets", "Cars SUVs Sailboats"],
+        answer: "Cascading Style Sheets"
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const resultEl = document.getElementById('result');
+
+    function loadQuestion() {
+      resetState();
+      let currentQuestion = quizData[currentQuestionIndex];
+      questionEl.innerText = currentQuestion.question;
+
+      currentQuestion.options.forEach(option => {
+        const button = document.createElement('button');
+        button.innerText = option;
+        button.onclick = selectAnswer;
+        optionsEl.appendChild(button);
+      });
+    }
+
+    function resetState() {
+      nextBtn.style.display = 'none';
+      while (optionsEl.firstChild) {
+        optionsEl.removeChild(optionsEl.firstChild);
+      }
+      resultEl.innerText = '';
+    }
+
+    function selectAnswer(e) {
+      const selectedBtn = e.target;
+      const answer = quizData[currentQuestionIndex].answer;
+
+      if (selectedBtn.innerText === answer) {
+        score++;
+        selectedBtn.style.backgroundColor = 'lightgreen';
+      } else {
+        selectedBtn.style.backgroundColor = 'salmon';
+      }
+
+      Array.from(optionsEl.children).forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerText === answer) {
+          btn.style.backgroundColor = 'lightgreen';
+        }
+      });
+
+      nextBtn.style.display = 'inline-block';
+    }
+
+    nextBtn.addEventListener('click', () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < quizData.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      resetState();
+      questionEl.innerText = "Quiz Completed!";
+      resultEl.innerText = `Your score: ${score} / ${quizData.length}`;
+      nextBtn.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
